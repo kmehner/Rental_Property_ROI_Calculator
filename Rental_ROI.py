@@ -1,9 +1,10 @@
+
 class Itemtype:                      # store all items in a class 
-    id_counter = 0
+    id_counter = 1
 
     def __init__(self, type, value):
         self.id = Itemtype.id_counter
-        self.id_counter += 1
+        Itemtype.id_counter += 1
         self.type = type
         self.value = value
 
@@ -15,14 +16,36 @@ class Itemtype:                      # store all items in a class
         formated_repr = (f"< Item {self.type} | {self.value}")
         return formated_repr
 
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if key in {'type', 'value'}:
+                setattr(self, key, value)
+
 class Income:                  # Income class to calculate income
     def __init__(self):
         self.total_income = 0
         self.income_items = []
 
     def get_values(self):
+        self.total_income = 0
         for item in self.income_items:
             self.total_income += item.value
+
+    def _get_income_item_from_id(self, income_id):
+        for income in self.income_items:
+            if income.id == income_id:
+                return income
+
+    def view_income_items(self, income_id):
+        income_item = self._get_income_item_from_id(income_id)
+        if income_id:
+            print(income_item)
+            new_value_prompt = int(input("What is the new value (numeric) for this item? "))
+            income_item.update(value = new_value_prompt)
+            print(f"The value for {income_item.type} is now {income_item.value}")
+        else:
+            print(f"Income item with an id {income_id} does not exist ")
+
 
     def get_income(self):
         # Rental income
@@ -54,14 +77,15 @@ class Income:                  # Income class to calculate income
         else:
             print("Sounds good!")
 
+
     def print_total_income(self):
         print(f"The total monthly rental income is ${self.total_income}")
 
     def print_income_items(self):
         for item in self.income_items:
-            print(f"{item.type}: {item.value}")
-
-    # add item ID to check like post
+            print(f"{item.id} {item.type}: {item.value}")
+        else:
+            print("Checking...")
 
 
 class Expenses:                  # expense class to calculate expenses
@@ -73,9 +97,26 @@ class Expenses:                  # expense class to calculate expenses
         for item in self.expense_items:
             self.total_expenses += item.value
 
+    def _get_expense_item_from_id(self, expense_id):
+        for expense in self.expense_items:
+            if expense.id == expense_id:
+                return expense
+
+
+    def view_expense_items(self, expense_id):
+        expense_item = self._get_expense_item_from_id(expense_id)
+        if expense_id:
+            print(expense_item)
+            new_value_prompt = int(input("What is the new value (numeric) for this item? "))
+            expense_item.update(value = new_value_prompt)
+            print(f"The value for {expense_item.type} is now {expense_item.value}")
+
+        else:
+            print(f"Expense item with an id {expense_id} does not exist ")
+
     def get_expenses(self):
         tax_prompt = float(input("What are the taxes on the property? "))
-        tax_expense = Itemtype("Taxes", tax_prompt)
+        tax_expense = Itemtype("Taxe Expense", tax_prompt)
         self.expense_items.append(tax_expense)
 
         insurance_prompt = float(input("What is the insurance cost? "))
@@ -122,11 +163,11 @@ class Expenses:                  # expense class to calculate expenses
             hoa_expense = Itemtype("HOA Expense", hoa_prompt)
             self.expense_items.append(hoa_expense)
 
-            lawn_prompt = float(input("What are the lawn expenses? Enter 0 if none"))
+            lawn_prompt = float(input("What are the lawn expenses? Enter 0 if none "))
             lawn_expense = Itemtype("Lawn Expense", lawn_prompt)
             self.expense_items.append(lawn_expense)
 
-            snow_prompt = float(input("What are the snow expenses? Enter 0 if none"))
+            snow_prompt = float(input("What are the snow expenses? Enter 0 if none "))
             snow_expense = Itemtype("Snow Expense", snow_prompt)
             self.expense_items.append(snow_expense)
 
@@ -151,8 +192,12 @@ class Expenses:                  # expense class to calculate expenses
         print(f"The total monthly rental expenses are ${self.total_expenses}")
 
     def print_expense_items(self):
-        for items in self.expense_items:
-            print(f"{items.type}: {items.value}")
+        if self.expense_items:
+            # expense_id = self._get_income_item_from_id(expense_id)
+            for items in self.expense_items:
+                print(f" {items.id} {items.type}: {items.value}")
+        else:
+            print("Checking...")
 
 class Cash_Return():
     def __init__(self, total_income, total_expenses):
@@ -163,6 +208,29 @@ class Cash_Return():
         self.total_investment = 0
         self.cash_on_cash_return = 0
         self.cash_return_list = []
+
+    def update_total_income(self, total_income):
+        self.total_income = total_income 
+    
+    def update_total_expenses(self, total_expenses):
+        self.total_expenses = total_expenses
+
+    def _get_return_item_from_id(self, return_id):
+        for item in self.cash_return_list:
+            if item.id == return_id:
+                return item
+
+    def view_return_item(self, return_id):
+        return_item = self._get_return_item_from_id(return_id)
+        if return_id:
+            print(return_item)
+            new_item_prompt = int(input("What is the new value (numeric) for this item? "))
+            return_item.update(value = new_item_prompt)
+            print(f"The value for {return_item.type} is now {return_item.value}")
+        else:
+         print(f"Cash return item with an id {return_id} does not exist ")
+
+
 
 # Cashflow values from classes Income and Expense 
     def get_total_monthly_cashflow(self): # Separate from annual cashflow (flexibility in the future)
@@ -202,8 +270,12 @@ class Cash_Return():
 
 # print statements 
     def print_investment_total(self):
-        for item in self.cash_return_list:
-            print(f"{item.type}: {item.value}")
+        if self.cash_return_list:
+            for item in self.cash_return_list:
+                print(f"{item.id} {item.type}: {item.value}")
+        else:
+            print("Checking... ")
+
     
     def print_total(self):
         print(f"""
@@ -216,8 +288,36 @@ class Cash_Return():
         Total Investment: {self.total_investment}
          -       -       -       -       -       - 
         
-        The Total Cash on Cash Return on Investment is: {self.cash_on_cash_return}%
+        The Final Cash on Cash Return on Investment is: {self.cash_on_cash_return}%
         """)
+
+def calculate_final(cashed):
+
+    # Calculating total annual cashflow 
+    cashed.get_total_monthly_cashflow()
+    cashed.get_total_annual_cashflow()
+
+    # Calcuating total investment
+    cashed.get_total_investment()
+    cashed.get_total_investment_value()
+
+    # Final number
+    # Print out reciept 
+    cashed.get_cash_on_cash_return()
+    cashed.print_total()
+
+
+def update_cashflow(cashed):
+
+    # Calculating total annual cashflow 
+    cashed.get_total_monthly_cashflow()
+    cashed.get_total_annual_cashflow()
+
+    cashed.get_total_investment_value()
+
+    # Print out reciept 
+    cashed.get_cash_on_cash_return()
+    cashed.print_total()
 
 # * * * * * * * * * * * * * * * * *
 def main():
@@ -247,19 +347,8 @@ def main():
 
     # Now to calculate the final values 
     cashed = Cash_Return(income.total_income, expense.total_expenses)
+    calculate_final(cashed)
 
-    # Calculating total annual cashflow 
-    cashed.get_total_monthly_cashflow()
-    cashed.get_total_annual_cashflow()
-
-    # Calcuating total investment
-    cashed.get_total_investment()
-    cashed.get_total_investment_value()
-
-    # Final number
-    # Print out reciept 
-    cashed.get_cash_on_cash_return()
-    cashed.print_total()
 
     # ask if they want to check their income 
     double_check = input ("Something doesn't look right? \nEnter 'check' to view income or expenses OR 'q' to quit ").lower()
@@ -273,10 +362,26 @@ def main():
             income_expense_investment = input("Not a valid input \nWhat would you like to check? 1. Income 2.Expenses or 3. Total Investment")
         if income_expense_investment == '1':
             income.print_income_items()
+            income_id = int(input("What is the id of the income item you would like to edit? "))
+            income.view_income_items(income_id)
+            income.get_values()
+            cashed.update_total_income(income.total_income)
+            update_cashflow(cashed)
+            
         elif income_expense_investment == '2':
             expense.print_expense_items()
+            expense_id = int(input("What is the id of the expense item you would like to edit? "))
+            expense.view_expense_items(expense_id)
+            expense.get_values()
+            cashed.update_total_expenses(expense.total_expenses)
+            update_cashflow(cashed)
+            
         elif income_expense_investment == '3':
             cashed.print_investment_total()
+            return_id = int(input("What is the id of the total investment item you would like to edit? "))
+            cashed.view_return_item(return_id)
+            update_cashflow(cashed)
+            
     else:
         print("Thank you! See you next time ")
 
@@ -284,3 +389,6 @@ def main():
     # Need to make sure the list wouldn't reset every time I run the program 
 
 main()
+
+
+
